@@ -1,0 +1,12 @@
+{
+  "name": "ldn-rocketpool-reth-access",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/readiness.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
