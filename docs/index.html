@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>rETH Mint Access — live, accessible Rocket Pool readiness checks</title>
+<meta name="description" content="Read-only Ethereum mainnet Rocket Pool deposit-status and rETH exchange rate checks, dynamically resolved via official RocketStorage. No wallet or staking.">
+<style>
+:root{color-scheme:dark;--bg:#070f1e;--panel:#111f37;--border:#34506a;--text:#f4fbff;--muted:#afc0d6;--aqua:#72e8d7;--gold:#eecf87;--bad:#ff9a9a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 100% 0%,#1b3e4b 0%,transparent 46%),var(--bg);color:var(--text);font:16px/1.6 system-ui,Segoe UI,-apple-system,sans-serif}
+a{color:var(--aqua);text-underline-offset:3px}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.skip{position:absolute;top:-100px;background:#fff;color:#000;padding:12px}.skip:focus{top:5px;left:5px;z-index:99}
+.wrap{width:min(1100px,92vw);margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding:27px 0;gap:16px;flex-wrap:wrap}
+h1{font-size:clamp(35px,6vw,65px);line-height:1.07;letter-spacing:-.055em;margin:16px 0 24px}
+h2{font-size:28px;margin:38px 0 12px;letter-spacing:-.03em}h3{font-size:20px}
+.eyebrow{color:var(--aqua);font-size:14px;letter-spacing:.14em;font-weight:800}
+.lead{max-width:760px;font-size:20px;color:var(--muted)}
+.card{border:1px solid var(--border);background:linear-gradient(135deg,#172a43,#0c192d);border-radius:20px;padding:25px;margin:17px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:11px 17px;background:var(--aqua);color:#0b2030;font-weight:800}
+button:disabled{opacity:.5;cursor:wait}
+.mono{font:14px/1.45 ui-monospace,Consolas,monospace;overflow-wrap:anywhere}
+.kicker{display:block;font-size:12px;color:var(--muted);font-weight:750;text-transform:uppercase;letter-spacing:.12em}
+.big{font-weight:800;font-size:25px;line-height:1.3;margin:8px 0}
+p{margin:7px 0 14px}.muted{color:var(--muted)}
+.warning{border-left:4px solid var(--gold);padding:16px 20px;background:#272532;color:#fff5db;margin:20px 0}
+input{max-width:280px;background:#0b1528;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:13px 15px;font:18px ui-monospace,Consolas,monospace;width:100%}
+#readiness{font-size:21px;font-weight:800;padding:10px 0}#readiness[data-state=disabled],#readiness[data-state=above_reported_maximum]{color:var(--bad)}
+#readiness[data-state=conditions_met]{color:var(--aqua)}.pills{display:flex;flex-wrap:wrap;gap:12px}
+.pill{display:inline-block;border:1px solid #316474;border-radius:30px;padding:6px 13px;color:var(--aqua);background:#112b3c;font-size:13px}
+dl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:5px 0}dt{color:var(--muted);font-size:13px}dd{margin:0 0 9px;overflow-wrap:anywhere}
+section{scroll-margin-top:25px}footer{padding:30px 0 45px;border-top:1px solid var(--border);margin-top:60px;font-size:14px;color:var(--muted)}
+@media(max-width:720px){.grid,dl{grid-template-columns:1fr}h1{font-size:39px}.card{padding:18px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style></head><body>
+<a class="skip" href="#main">Skip to main content</a>
+<div class="wrap"><header><strong>LDN / <span style="color:var(--aqua)">rETH MINT ACCESS</span></strong><span class="pill">Free · Open Source · Read-only</span></header>
+<main id="main"><section aria-labelledby="title" style="padding:48px 0 8px">
+<div class="eyebrow">ROCKET POOL / ACCESSIBILITY PILOT</div>
+<h1 id="title">Before you mint rETH,<br>verify the protocol state.</h1>
+<p class="lead">An independent accessibility-focused guide that reads Rocket Pool's currently registered Ethereum contracts. No account, private key, wallet connection or financial transaction is requested.</p>
+<div class="pills"><span class="pill">Live Ethereum blocks</span><span class="pill">Dynamic RocketStorage discovery</span><span class="pill">No staking button</span><span class="pill">Readable, keyboard-first</span></div>
+</section>
+<section class="card" aria-labelledby="status-title"><h2 id="status-title" style="margin-top:0">Network verification</h2>
+<p id="rpcstate" role="status" aria-live="polite">Checking public Ethereum mainnet RPC…</p>
+<button id="refresh" type="button">Refresh verified contract data</button>
+<p class="muted" style="font-size:14px">Reads two independent public RPC endpoints in sequence and rejects non-mainnet responses. No data is sent to us. <strong>One block snapshot</strong> is used for all contract calls on each refresh.</p></section>
+<section id="fallback" class="card" hidden aria-live="polite">
+<h2>Live data unavailable</h2><p>Never assume the protocol is accepting a deposit when data cannot be verified. Check the official staking interface and on-chain explorer instead.</p><p id="errors" class="mono"></p><a href="https://rocketpool.net/" target="_blank" rel="noopener noreferrer">Official Rocket Pool</a>
+</section>
+<section id="details" hidden>
+<div class="grid">
+<article class="card" aria-labelledby="enabled-title"><span class="kicker" id="enabled-title">Protocol deposit switch</span><p class="big" id="enabled">Checking…</p><p class="muted">The on-chain switch only. A successful mint is not guaranteed.</p></article>
+<article class="card"><span class="kicker">ETH backing one rETH</span><p class="big" id="rate">Checking…</p><p class="muted">Protocol exchange rate; not a DEX price or a guaranteed execution quote.</p></article>
+<article class="card"><span class="kicker">Minimum ETH deposit</span><p class="big" id="minimum">Checking…</p><p class="muted">Read from current DAO deposit settings; check transaction fees separately.</p></article>
+<article class="card"><span class="kicker">Reported maximum amount</span><p class="big" id="max">Checking…</p><p class="muted">This value is a smart-contract calculation, not immediately withdrawable liquidity and not a guaranteed capacity.</p></article></div>
+<article class="card" aria-labelledby="estimate-title">
+<h2 id="estimate-title" style="margin-top:0">Evaluate an illustrative ETH amount</h2>
+<label for="amount">Amount (ETH)</label><p><input id="amount" value="0.1" inputmode="decimal" autocomplete="off" spellcheck="false" aria-describedby="amount-help"></p>
+<p id="amount-help" class="muted">This is a math-only estimate. No funds will move; no wallet is accessed.</p>
+<p id="readiness" data-state="unknown" role="status" aria-live="polite">Readiness pending…</p>
+<p class="big" id="estimate">Not calculated</p>
+<div class="warning"><strong>Important:</strong> This indicator checks public on-chain read methods, not the transaction path. Minting can fail because of additional restrictions, gas limits, reverts, slippage, changing protocol state or smart-contract risks. Do not send money based on this page.</div>
+<p><a href="https://stake.rocketpool.net/" target="_blank" rel="noopener noreferrer">Verify independently in Rocket Pool’s official staking interface</a></p>
+</article>
+<article class="card" aria-labelledby="proof-title">
+<h2 id="proof-title" style="margin-top:0">Reproducible on-chain provenance</h2>
+<dl><div><dt>Ethereum block</dt><dd id="block" class="mono"></dd></div><div><dt>Block timestamp</dt><dd id="time" class="mono"></dd></div><div><dt>Block hash</dt><dd id="hash" class="mono"></dd></div><div><dt>Deposit pool contract-reported balance</dt><dd id="balance" class="mono"></dd></div>
+<div><dt>RocketStorage registry</dt><dd><a id="registry" class="mono" target="_blank" rel="noopener noreferrer"></a></dd></div>
+<div><dt>Discovered deposit-pool contract</dt><dd><a id="deposit" class="mono" target="_blank" rel="noopener noreferrer"></a></dd></div>
+<div><dt>Discovered rETH contract</dt><dd><a id="reth" class="mono" target="_blank" rel="noopener noreferrer"></a></dd></div>
+<div><dt>Discovered deposit settings</dt><dd><a id="settings" class="mono" target="_blank" rel="noopener noreferrer"></a></dd></div></dl>
+<p class="muted" id="verified"></p>
+</article></section>
+<section><h2>Read before using rETH</h2>
+<div class="grid">
+<article class="card"><h3>What direct minting means</h3><p>ETH is deposited through the current Rocket Pool deposit contract to receive rETH if the protocol accepts your deposit. Rocket Pool’s documentation explains minimums, queues, fees and liquidity constraints. This tool never calls a payable deposit method.</p><a href="https://docs.rocketpool.net/liquid-staking/overview.html" target="_blank" rel="noopener noreferrer">Official liquid staking guide</a></article>
+<article class="card"><h3>Risk and verification</h3><p>rETH is a liquid-staking token. Smart contract, validator, redemption-liquidity, price and protocol upgrade risks remain. The protocol rate is not a promise of an exchange-market rate. Independent verification is essential.</p><a href="https://docs.rocketpool.net/en/protocol/contracts-integrations.html" target="_blank" rel="noopener noreferrer">Official contract registry reference</a></article>
+</div></section>
+<section class="card"><h2 style="margin-top:0">Accessibility and honest scope</h2>
+<p>This volunteer prototype is usable with a keyboard, screen reader labels, high contrast, status announcements and reduced-motion preferences. It does not ask for a wallet, simulate or send a real deposit, guarantee a mint, display a financial recommendation, or imply endorsement by Rocket Pool.</p>
+<p><strong>Español:</strong> Herramienta gratuita de consulta, sin conectar la cartera ni realizar transacciones. Los resultados informan sobre contratos públicos, pero no garantizan que puedas acuñar rETH. Verifica siempre en la plataforma oficial.</p>
+<p><a href="https://github.com/luxedigitalnest/ldn-rocketpool-reth-access" target="_blank" rel="noopener noreferrer">Public Apache-2.0 source, tests and issue tracker</a></p></section>
+</main><footer>LuxeDigitalNest independent open-source pilot · Ethereum data are provided by third-party public RPC nodes · No cookies, telemetry, registration, or wallet approvals · Not financial advice.</footer></div>
+<script type="module" src="./app.js"></script>
+</body></html>
