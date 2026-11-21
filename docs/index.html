@@ -41,7 +41,7 @@ section{scroll-margin-top:25px}footer{padding:30px 0 45px;border-top:1px solid v
 <section class="card" aria-labelledby="status-title"><h2 id="status-title" style="margin-top:0">Network verification</h2>
 <p id="rpcstate" role="status" aria-live="polite">Checking public Ethereum mainnet RPC…</p>
 <button id="refresh" type="button">Refresh verified contract data</button>
-<p class="muted" style="font-size:14px">Reads two independent public RPC endpoints in sequence and rejects non-mainnet responses. No data is sent to us. <strong>One block snapshot</strong> is used for all contract calls on each refresh.</p></section>
+<p class="muted" style="font-size:14px">Tries public RPC endpoints in order, using a fallback if one fails, and rejects non-mainnet responses. No data is sent to us. <strong>One block snapshot</strong> is used for all contract calls on each refresh.</p></section>
 <section id="fallback" class="card" hidden aria-live="polite">
 <h2>Live data unavailable</h2><p>Never assume the protocol is accepting a deposit when data cannot be verified. Check the official staking interface and on-chain explorer instead.</p><p id="errors" class="mono"></p><a href="https://rocketpool.net/" target="_blank" rel="noopener noreferrer">Official Rocket Pool</a>
 </section>
