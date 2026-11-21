@@ -1,0 +1,22 @@
+name: rETH Read-Only Accessibility CI
+on:
+  push:
+    paths:
+      - "docs/**"
+      - "tests/**"
+      - "package.json"
+      - ".github/workflows/check.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check deterministic readiness and safety tests
+        run: npm test
